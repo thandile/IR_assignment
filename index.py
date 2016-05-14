@@ -17,7 +17,7 @@ if len(sys.argv)==1:
 collection = sys.argv[1]
 
 # read and parse input data - extract words, identifiers and titles
-f = open (collection, "r")
+#f = open (collection, "r")
 identifier = ''
 document = ''
 title = ''
@@ -25,35 +25,18 @@ indocument = False
 intitle = False
 data = {}
 titles = {}
-for line in f:
-    mo = re.match (r'\.I ([0-9]+)', line)
-    if mo:
-        if document!='':
-            data[identifier] = document
-        identifier = mo.group (1)
-        indoc = False
-    else:
-        mo = re.match (r'\.T', line)
-        if mo:
-           title = ''
-           intitle = True
-        else:
-           mo = re.match (r'\.W', line)
-           if mo:
-               document = ''
-               indoc = True
-           else:
-               if intitle:
-                   intitle = False
-                   if identifier!='':
-                      titles[identifier] = line[:-1][:50]
-               elif indoc:
-                   document += " "
-                   if parameters.case_folding:
-                       document += line.lower()
-                   else:
-                       document += line    
-f.close ()
+
+for fname in os.listdir(collection):
+        if fname.split(".")[0]=="document":
+           with open(collection+"/"+fname, encoding="ascii",errors="surrogateescape") as f:
+              #print (fname)
+              #get the document number
+              doc_number = fname.split(".")[1]
+              
+              lines = f.read().replace('\n', '')
+              
+              data[doc_number]=lines
+              titles[doc_number] = fname
 
 # document length/title file
 g = open (collection + "_index_len", "w")
@@ -62,15 +45,24 @@ g = open (collection + "_index_len", "w")
 index = {}
 N = len (data.keys())
 p = porter.PorterStemmer ()
+
+#data contains the document key value pairs.
+#key is the file name and value the lines in the file
 for key in data:
     content = re.sub (r'[^ a-zA-Z0-9]', ' ', data[key])
     content = re.sub (r'\s+', ' ', content)
     words = content.split (' ')
     doc_length = 0
+    #if key=="1":
+       #print ("array: ",words)
     for word in words:
         if word != '':
+            #convert to lower case first
+            word = word.lower()
             if parameters.stemming:
                 word = p.stem (word, 0, len(word)-1)
+            #if word == "avl" or word == "Avl":
+               #print ("doc with avl: ",key)
             doc_length += 1
             if not word in index:
                 index[word] = {key:1}
@@ -79,7 +71,7 @@ for key in data:
                     index[word][key] = 1
                 else:
                     index[word][key] += 1
-    print (key, doc_length, titles[key], sep=':', file=g) 
+    print (key, doc_length, titles[key], sep=':', file=g)
 
 # document length/title file
 g.close ()
@@ -89,11 +81,18 @@ try:
    os.mkdir (collection+"_index")
 except:
    pass
+
+#the key is the word
 for key in index:
-    f = open (collection+"_index/"+key, "w")
-    for entry in index[key]:
-        print (entry, index[key][entry], sep=':', file=f)
-    f.close ()
+    #print ("key: ",key)
+    try:
+       f = open (collection+"_index/"+key, "w")
+       #the entry is the document number
+       for entry in index[key]:
+          print (entry, index[key][entry], sep=':', file=f)
+       f.close ()
+    except:
+       pass
 
 # write N
 f = open (collection+"_index_N", "w")

@@ -53,30 +53,41 @@ for term in query_words:
         if parameters.stemming:
             term = p.stem (term, 0, len(term)-1)
         if not os.path.isfile (collection+"_index/"+term):
+           print ("term not found: ",term)
            continue
         f = open (collection+"_index/"+term, "r")
         lines = f.readlines ()
         idf = 1
         if parameters.use_idf:
+           #df is document frequency, documents which contains the term
            df = len(lines)
+
+           #inverse df is to give preference to term with less document appearance
            idf = 1/df
            if parameters.log_idf:
               idf = math.log (1 + N/df)
+        #lines with document and number of occurences of the term
         for line in lines:
+            #print ("documents with term: ",line)
             mo = re.match (r'([0-9]+)\:([0-9\.]+)', line)
             if mo:
                 file_id = mo.group(1)
+
+                #term frequency is the number of terms in the document
                 tf = float (mo.group(2))
+
                 if not file_id in accum:
                     accum[file_id] = 0
                 if parameters.log_tf:
                     tf = (1 + math.log (tf))
                 accum[file_id] += (tf * idf)
+                
         f.close()
 
 # parse lengths data and divide by |N| and get titles
 for l in lengths:
    mo = re.match (r'([0-9]+)\:([0-9\.]+)\:(.+)', l)
+   #print ("after mo ",mo)
    if mo:
       document_id = mo.group (1)
       length = eval (mo.group (2))
@@ -88,5 +99,5 @@ for l in lengths:
 
 # print top ten results
 result = sorted (accum, key=accum.__getitem__, reverse=True)
-for i in range (min (len (result), 10)):
+for i in range (min (len (result), 15)):
    print ("{0:10.8f} {1:5} {2}".format (accum[result[i]], result[i], titles[result[i]]))
