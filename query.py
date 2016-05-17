@@ -182,6 +182,6 @@ def run_query():
 
    print_results()
    irndcg.irndcg(query_id, relevant_doc_ids, query_file)
-   #irmap.irmap(query_id, relevant_doc_ids)
+   irmap.irmap(query_id, relevant_doc_ids, query_file)
 run_query()
 

@@ -1,4 +1,3 @@
-import sys
 import math
 def irndcg(query_id, relevant_doc_ids, query_file):
     path = query_file[0:query_file.rfind('\\')]
@@ -36,5 +35,11 @@ def irndcg(query_id, relevant_doc_ids, query_file):
     print("IDCG value: "+ str(idcg))
 
     #NDCG value
-    ndcg = dcg/idcg
+    try:
+        ndcg = dcg/idcg
+    except:
+        ndcg = 0
+
     print("NDCG value: " + str(ndcg))
+
+    return ndcg
