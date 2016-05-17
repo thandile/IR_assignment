@@ -7,6 +7,7 @@ import math
 import sys
 import os
 import irndcg
+import irmap
 import porter
 
 import parameters
@@ -180,6 +181,7 @@ def run_query():
       parse_lengths()
 
    print_results()
-   return irndcg.irndcg(query_id, relevant_doc_ids)
+   irndcg.irndcg(query_id, relevant_doc_ids, query_file)
+   irmap.irmap(query_id, relevant_doc_ids, query_file)
 run_query()
 

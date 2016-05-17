@@ -1,8 +1,8 @@
-import sys
 import math
-def irndcg(query_id, relevant_doc_ids):
+def irndcg(query_id, relevant_doc_ids, query_file):
+    path = query_file[0:query_file.rfind('\\')]
     relevant_doc_ids = [int(i) for i in relevant_doc_ids]
-    relevance_file = ".\\testbeds\\testbed6\\relevance."+query_id #to fetch relevance values from relavance file
+    relevance_file = path+"\\relevance."+query_id #to fetch relevance values from relavance file4
     relevance = []
     f =  open(relevance_file, "r")
     content = f.read()
@@ -35,5 +35,11 @@ def irndcg(query_id, relevant_doc_ids):
     print("IDCG value: "+ str(idcg))
 
     #NDCG value
-    ndcg = dcg/idcg
+    try:
+        ndcg = dcg/idcg
+    except:
+        ndcg = 0
+
     print("NDCG value: " + str(ndcg))
+
+    return ndcg
