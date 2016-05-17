@@ -180,6 +180,6 @@ def run_query():
       parse_lengths()
 
    print_results()
-   irndcg.irndcg(query_id, relevant_doc_ids)
+   return irndcg.irndcg(query_id, relevant_doc_ids)
 run_query()
 
