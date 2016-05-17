@@ -1,7 +1,19 @@
 import sys
 import math
-def irndcg():
-    relevance = [5, 2, 3, 0, 1]
+def irndcg(query_id, relevant_doc_ids):
+    relevant_doc_ids = [int(i) for i in relevant_doc_ids]
+    relevance_file = ".\\testbeds\\testbed6\\relevance."+query_id #to fetch relevance values from relavance file
+    relevance = []
+    f =  open(relevance_file, "r")
+    content = f.read()
+    split_content = content.splitlines()
+    for i in range(len(split_content)): #searching in relevance file for the relevance of each document
+        if i in relevant_doc_ids:
+            relevance.append(int(split_content[i]))
+            #print(i)
+            #print(split_content[i])
+    #print(relevance)
+
     dcg = 0
     j = 1
     #dcg value
@@ -25,4 +37,3 @@ def irndcg():
     #NDCG value
     ndcg = dcg/idcg
     print("NDCG value: " + str(ndcg))
-irndcg()

@@ -6,7 +6,7 @@ import re
 import math
 import sys
 import os
-
+import irndcg
 import porter
 
 import parameters
@@ -17,14 +17,18 @@ import feedback
 if len(sys.argv)<3:
    print ("Syntax: index.py <collection> <query>")
    exit(0)
- 
+
 # construct collection and query
 collection = sys.argv[1]
 query = ''
+query_file = ''   #search using the query file ".\testbeds\testbed6\query.1"
 arg_index = 2
 while arg_index < len(sys.argv):
-   query += sys.argv[arg_index] + ' '
-   arg_index += 1
+    query_file += sys.argv[arg_index] + ' '
+    f = open(query_file, "r")
+    query = f.readline()
+    f.close()
+    arg_index += 1
 
 # clean query
 if parameters.case_folding:
@@ -32,14 +36,15 @@ if parameters.case_folding:
 query = re.sub (r'[^ a-zA-Z0-9]', ' ', query)
 query = re.sub (r'\s+', ' ', query)
 query_words = query.split (' ')
-
+query_id = query_file.split(".")[-1]
+print(query_id)
 # create accumulators and other data structures
 accum = {}
 filenames = []
-p = porter.PorterStemmer ()
+p = porter.PorterStemmer()
 feedback_weights = {}
 original_query_words = []
-
+relevant_doc_ids = []  #used to search in the relevance documents
 # get N
 f = open (collection+"_index_N", "r")
 N = eval (f.read ())
@@ -97,7 +102,7 @@ def query():
                    #print("term:",term)
                    accum[file_id] += feedback_weights[term]*(tf * idf)
                    #print("score:",accum[file_id],"tf:",tf,"idf:",idf,"tf*idf",str(tf*idf))
-                   
+				   
            f.close()
 
 def parse_lengths():
@@ -117,14 +122,14 @@ def parse_lengths():
 
 
 def get_feedback(doc_num):
-   
+
    result = sorted (accum, key=accum.__getitem__, reverse=True)
-   
+
    #get feedback terms
    fb_documents={}
    for i in range (min (len (result), doc_num)):
       fb_documents[result[i]] = accum[result[i]]
-      
+
    feedback_term_weights = feedback.term_finder(fb_documents,collection,original_query_words)
 
    #add the terms to the weights
@@ -145,9 +150,10 @@ def get_feedback(doc_num):
 def print_results():
    # print top ten results
    result = sorted (accum, key=accum.__getitem__, reverse=True)
-   
+
    for i in range (min (len (result), 15)):
       print ("{0:10.8f} {1:5} {2}".format (accum[result[i]], result[i], titles[result[i]]))
+      relevant_doc_ids.append((result[i]))
 
 def run_query():
    initial_feedback_weights()
@@ -168,11 +174,12 @@ def run_query():
                print ("incremental feedback terms:",term," score:",feedback_weights[term])
       else:
          get_feedback(5)
-               
+
       query()
 
       parse_lengths()
 
    print_results()
-
+   irndcg.irndcg(query_id, relevant_doc_ids)
 run_query()
+
