@@ -73,7 +73,7 @@ def term_finder (documents,collection,exclude):
     sorted_scores = sorted (term_scores, key=term_scores.__getitem__, reverse=True)
     top_score = term_scores[sorted_scores[0]]
 
-    for i in range (1,5):
+    for i in range (1,parameters.feedback_terms):
         term = sorted_scores[i]
         print ("feedback term:",term," score:",term_scores[term])
         term_weights[term] = parameters.feedback_weight*(term_scores[term]/top_score)

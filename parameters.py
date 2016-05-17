@@ -10,5 +10,6 @@ use_idf = True
 log_idf = True
 feedback = True
 incremental_feedback = False
-feedback_iterations = 30
+feedback_iterations = 10
+feedback_terms = 10
 feedback_weight = 1

@@ -102,7 +102,8 @@ def query():
                    #Other feedback terms with have smaller weights to avoid diversion from original query
                    #print("term:",term)
                    accum[file_id] += feedback_weights[term]*(tf * idf)
-
+                   #print("score:",accum[file_id],"tf:",tf,"idf:",idf,"tf*idf",str(tf*idf))
+				   
            f.close()
 
 def parse_lengths():
@@ -135,10 +136,12 @@ def get_feedback(doc_num):
    #add the terms to the weights
    for term in feedback_term_weights:
       weight = feedback_term_weights[term]
-
+      
       if parameters.stemming:
          term = p.stem (term, 0, len(term)-1)
 
+      #print ("term:",term,"weight: ",str(weight))
+      
       if term in feedback_weights:
          feedback_weights[term] += weight
       else:
