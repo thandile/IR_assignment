@@ -9,6 +9,7 @@ import os
 import irndcg
 import irmap
 import porter
+import time
 
 import parameters
 
@@ -38,7 +39,7 @@ query = re.sub (r'[^ a-zA-Z0-9]', ' ', query)
 query = re.sub (r'\s+', ' ', query)
 query_words = query.split (' ')
 query_id = query_file.split(".")[-1]
-print(query_id)
+print("queryid:",query_id)
 # create accumulators and other data structures
 accum = {}
 filenames = []
@@ -58,6 +59,8 @@ lengths = f.readlines ()
 f.close ()
 
 def initial_feedback_weights():
+   print ("query feedback: ",parameters.feedback,"incremental:",parameters.incremental_feedback,"positional:",parameters.positional_feedback)
+   #time.sleep(5.5)
    for term in query_words:
       original_query_words.append(term)
       if parameters.stemming:
@@ -131,6 +134,7 @@ def get_feedback(doc_num):
    for i in range (min (len (result), doc_num)):
       fb_documents[result[i]] = accum[result[i]]
 
+   #print("params for feedback: ",str(fb_documents),"***",str(original_query_words),"***",str(collection))
    feedback_term_weights = feedback.term_finder(fb_documents,collection,original_query_words)
 
    #add the terms to the weights
@@ -167,21 +171,42 @@ def run_query():
 
       if (parameters.incremental_feedback):
          for i in range (1,parameters.feedback_iterations+1):
-           get_feedback(5*i)
+            print("getdocs: ",str(parameters.feedback_documents*i))
+            get_feedback(parameters.feedback_documents*i)
+
+         #sort the feedback parameters and get only the terms in parameters.terms
+         result = sorted (feedback_weights, key=feedback_weights.__getitem__, reverse=True)
+
+         for i in range (min (len (result), parameters.feedback_terms),len(result)):
+            try:
+               #print("removed:",result[i])
+               query_words.remove(result[i])
+            except:
+               pass
 
          for term in feedback_weights:
             if term not in original_query_words:
                feedback_weights[term] = feedback_weights[term]/parameters.feedback_iterations
-               print ("incremental feedback terms:",term," score:",feedback_weights[term])
+               if term in query_words:
+                  print ("incremental feedback terms:",term," score:",feedback_weights[term])
       else:
-         get_feedback(5)
+         get_feedback(parameters.feedback_documents)
 
       query()
 
       parse_lengths()
 
    print_results()
-   irndcg.irndcg(query_id, relevant_doc_ids, query_file)
-   irmap.irmap(query_id, relevant_doc_ids, query_file)
-run_query()
+
+   returned = []
+   returned.append(irndcg.irndcg(query_id, relevant_doc_ids, query_file))
+   returned.append( irmap.irmap(query_id, relevant_doc_ids, query_file) )
+
+   return returned
+
+idcg_map = run_query()
+f = open ("query_results.txt", "w")
+print (str(idcg_map[0])+"\n"+str(idcg_map[1]), file=f)
+f.close ()
+
 

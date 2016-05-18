@@ -23,7 +23,12 @@ def irmap(query_id, relevant_doc_ids, query_file):
     sum = 0
     for i in precision:
         sum = sum + i
-    map = sum/(len(precision))
+
+    try:
+        map = sum/(len(precision))
+    except:
+        print("*** Relevance files empty ***")
+        map = 0
 
 
     print("The MAP value is: " + str(map))

@@ -4,6 +4,7 @@ def irndcg(query_id, relevant_doc_ids, query_file):
     relevant_doc_ids = [int(i) for i in relevant_doc_ids]
     relevance_file = path+"\\relevance."+query_id #to fetch relevance values from relavance file4
     relevance = []
+    print("relpath:",relevance_file)
     f =  open(relevance_file, "r")
     content = f.read()
     split_content = content.splitlines()

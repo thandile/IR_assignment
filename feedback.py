@@ -12,17 +12,18 @@ import porter
 import parameters
 
 p = porter.PorterStemmer ()
-data = {}
-doc_freq = {}
-term_scores = {}
-term_weights = {}
 
 def term_finder (documents,collection,exclude):
+
+    data = {}
+    doc_freq = {}
+    term_scores = {}
+    term_weights = {}
     
     for doc_num in documents:
         doc = "document."+doc_num
         with open(collection+"/"+doc, encoding="ascii",errors="surrogateescape") as f:
-            #print (fname)
+            #print (doc_num)
             #get the document number
             #doc_number = fname.split(".")[1]
             lines = f.read().replace('\n', '')
@@ -34,6 +35,12 @@ def term_finder (documents,collection,exclude):
         content = re.sub (r'[^ a-zA-Z0-9]', ' ', data[key])
         content = re.sub (r'\s+', ' ', content)
         words = content.split (' ')
+
+        if parameters.positional_feedback:
+            new_words = positioned_terms(words,exclude)
+            if new_words:
+                words = new_words
+            
         doc_length = 0
         #if key=="1":
            #print ("array: ",words)
@@ -57,7 +64,6 @@ def term_finder (documents,collection,exclude):
     
     for term in doc_freq:
         #idf = math.log (1 + N/df)
-
         #check that the term exists in the inverted files else drop it
         if (term not in exclude) and (os.path.isfile (collection+"_index/"+term) ):
            score1 = math.log (1 + doc_freq[term] )
@@ -79,3 +85,32 @@ def term_finder (documents,collection,exclude):
         term_weights[term] = parameters.feedback_weight*(term_scores[term]/top_score)
 
     return term_weights
+
+def positioned_terms(words,query):
+    positions = []
+    new_words = []
+    for term in query:
+        term_positions = all_indices(term,words)
+        positions.extend (term_positions)
+
+    for position in positions:
+        min_range = max(0,position - parameters.term_position_radius)
+        max_range = min(len(words),position + parameters.term_position_radius)
+
+        for i in range (min_range,max_range):
+            new_words.append(words[i])
+
+    return new_words
+
+
+def all_indices(value,qlist):
+    indices =[]
+    idx=-1
+    while True:
+        try:
+            idx = qlist.index(value,idx+1)
+            indices.append(idx)
+        except ValueError:
+            break
+    return indices
+        
