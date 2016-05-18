@@ -19,5 +19,5 @@ feedback_weight = 1
 incremental_feedback = True
 feedback_iterations = 3
 
-positional_feedback = False
+positional_feedback = True
 term_position_radius = 2
