@@ -10,6 +10,7 @@ import irndcg
 import irmap
 import porter
 import time
+import stop
 
 import parameters
 
@@ -71,7 +72,7 @@ def initial_feedback_weights():
 def query():
    # get index for each term and calculate similarities using accumulators
    for term in query_words:
-       if term != '':
+       if term != '' and (term not in stop.stop_words):
            if parameters.stemming:
                term = p.stem (term, 0, len(term)-1)
            if not os.path.isfile (collection+"_index/"+term):
