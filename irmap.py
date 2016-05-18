@@ -10,6 +10,7 @@ def irmap(query_id, relevant_doc_ids, query_file):
         if i in relevant_doc_ids:
             relevance.append(int(split_content[i]))
    # relevance = [1,0, 2]
+    relevance = [(i/2) for i in relevance]
     precision = []
 
     relCount = 0

@@ -4,4 +4,5 @@ import os
 
 for folder in os.listdir("testbeds"):
     print(folder)
-    subprocess.call(["python", "index.py",".\\testbeds\\"+folder+"\\"])
+    if folder!=".DS_Store":
+        subprocess.call(["python", "index.py",".\\testbeds\\"+folder+"\\"])

@@ -17,7 +17,7 @@ feedback_documents = 5
 feedback_weight = 1
 
 incremental_feedback = True
-feedback_iterations = 3
+feedback_iterations = 2
 
 positional_feedback = True
-term_position_radius = 2
+term_position_radius = 4
